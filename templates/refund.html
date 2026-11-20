@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}ЛК — оформить возврат{% endblock %}
+{% block content %}
+<p class="eyebrow">{{ payment.login }} / {{ payment.site_name }}</p>
+<h1>Возврат по платежу №{{ payment.id }}</h1>
+<p>Укажите количество по каждой позиции. Ноль означает, что позиция не возвращается.</p>
+<form class="panel" method="post">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="request_key" value="{{ request_key }}">
+  <div class="table-wrap"><table>
+    <thead><tr><th>Товар</th><th>Куплено</th><th>Доступно</th><th>К возврату</th><th>Цена</th></tr></thead>
+    <tbody>
+      {% for i in items %}
+        <tr><td>{{ i.name }}</td><td>{{ i.qty }} {{ units[i.unit] }}</td><td>{{ i.available }}</td>
+          <td><input class="qty" aria-label="Количество к возврату: {{ i.name }}"
+            name="q_{{ i.id }}" type="number" min="0" max="{{ i.available }}" value="0" required></td>
+          <td>{{ i.price|money }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  <p>Учебный банк всегда одобряет возврат в пределах доступного количества.</p>
+  <label>Ответ ККТ
+    <select name="kkt"><option value="ok">Успех</option><option value="error">Ошибка ККТ</option></select>
+  </label>
+  <p><button>Провести возврат</button> <a href="{{ url_for('payment_detail', pid=payment.id) }}">Отмена</a></p>
+</form>
+{% endblock %}

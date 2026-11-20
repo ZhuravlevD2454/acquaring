@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}ЛК — платежи{% endblock %}
+{% block content %}
+<h1>Платежи</h1>
+<div class="panel table-wrap"><table>
+  <thead><tr><th>Продавец / сайт</th><th>Платеж</th><th>Сумма</th>
+    <th>Банк / карта</th><th>Ответ банка</th><th>Первичный чек</th></tr></thead>
+  <tbody>
+    {% for p in payments %}
+      <tr><td>{{ p.login }} / {{ p.site_name }}</td>
+        <td><a href="{{ url_for('payment_detail', pid=p.id) }}">№{{ p.id }}</a><br>{{ p.created_at }} UTC</td>
+        <td>{{ p.total|money }}</td><td>{{ p.bank }}<br><code>{{ p.card_mask }}</code></td>
+        <td><code>{{ p.result_code }}</code></td><td><code>{{ p.kkt_code }}</code></td></tr>
+    {% else %}
+      <tr><td colspan="6">Платежей пока нет.</td></tr>
+    {% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

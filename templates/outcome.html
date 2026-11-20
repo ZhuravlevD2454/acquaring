@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">{{ site.name }}</p>
+<h1>{% block result_heading %}{% endblock %}</h1>
+<section class="panel">
+  <p>Банк: <strong>{{ result.bank }}</strong> · {{ result.masked }}</p>
+  <p>Ответ банка: <code>{{ result.bank_code }}</code></p>
+  {% if result.pid %}
+    <p>Платеж №{{ result.pid }}. Чек №{{ result.receipt }}: <code>{{ result.kkt }}</code>.</p>
+    {% if result.kkt != 'KKT_OK' %}
+      <p class="notice error">Банк одобрил оплату, но учебная ККТ не зарегистрировала чек.</p>
+    {% endif %}
+  {% else %}
+    <p>Платеж и чек не созданы. ККТ не вызывалась. Корзина сохранена.</p>
+  {% endif %}
+  <a class="button" href="{{ url_for('shop_page', slug=site.slug) }}">Вернуться в магазин</a>
+</section>
+{% endblock %}

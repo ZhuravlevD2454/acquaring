@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}ЛК — возвраты{% endblock %}
+{% block content %}
+<h1>Возвраты</h1>
+<div class="panel table-wrap"><table>
+  <thead><tr><th>Продавец / сайт</th><th>Возврат</th><th>Платеж</th>
+    <th>Сумма</th><th>Ответ банка</th><th>Ответ ККТ</th></tr></thead>
+  <tbody>
+    {% for r in refunds %}
+      <tr><td>{{ r.login }} / {{ r.site_name }}</td>
+        <td><a href="{{ url_for('payment_detail', pid=r.payment_id) }}#refund-{{ r.id }}">№{{ r.id }}</a><br>{{ r.created_at }} UTC</td>
+        <td><a href="{{ url_for('payment_detail', pid=r.payment_id) }}">№{{ r.payment_id }}</a></td>
+        <td>{{ r.amount|money }}</td><td><code>{{ r.bank_code }}</code></td><td><code>{{ r.kkt_code }}</code></td></tr>
+    {% else %}<tr><td colspan="6">Возвратов пока нет.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

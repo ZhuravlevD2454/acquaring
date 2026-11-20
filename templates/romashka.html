@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ site.name }} — оплата{% endblock %}
+{% block scripts %}<script defer src="{{ url_for('static', filename='shop.js') }}"></script>{% endblock %}
+{% block content %}
+<p class="eyebrow">Тестовый магазин</p>
+<h1>{{ site.name }}</h1>
+<p>Немаркируемые товары. Способ расчета: полный расчет.</p>
+{% include "checkout.html" %}
+{% endblock %}

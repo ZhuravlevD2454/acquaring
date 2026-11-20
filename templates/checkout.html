@@ -1,0 +1,90 @@
+<section class="panel">
+  <h2>Добавить предмет расчета</h2>
+  <form id="item-form" method="post" action="{{ url_for('edit_cart', slug=site.slug) }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    {% if site.kind == 'vasilek' %}
+      {% if items %}
+        <p>Способ расчета: <strong>{{ methods[items[0].method] }}</strong></p>
+        <input type="hidden" name="method" id="method" value="{{ items[0].method }}">
+      {% else %}
+        <label>Способ расчета
+          <select name="method" id="method" required>
+            <option value="">Выберите до добавления товаров</option>
+            {% for key, label in methods.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+          </select>
+        </label>
+      {% endif %}
+    {% endif %}
+    <div class="grid fields">
+      <label>Наименование <input name="name" maxlength="128" required></label>
+      <label>Количество <input id="qty" name="qty" type="number" min="1" max="9999" value="1" required></label>
+      <label>Цена за единицу, ₽ <input name="price" inputmode="decimal" placeholder="199,90" required></label>
+      <label>Налоговая ставка
+        <select name="vat">
+          {% for key, label in vat_labels.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Единица измерения
+        <select name="unit" id="unit">
+          {% for key, label in units.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      {% if site.kind == 'vasilek' %}
+        <label class="check"><input type="checkbox" name="marked" id="marked" value="1"> Маркируемый товар</label>
+        <label id="mark-field">Код для маркируемой позиции при полном расчете
+          <input name="mark_code" id="mark-code" maxlength="95" placeholder="DEMO-0001">
+        </label>
+      {% endif %}
+    </div>
+    <button name="action" value="add">Добавить позицию</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Корзина</h2>
+  {% if items %}
+    <div class="table-wrap"><table>
+      <thead><tr><th>Товар</th><th>Количество</th><th>Цена</th><th>НДС</th><th>Сумма</th></tr></thead>
+      <tbody>
+      {% for i in items %}
+        <tr><td>{{ i.name }}{% if i.marked %} · маркируемый{% endif %}
+          {% if i.mark_code %} · {{ i.mark_code }}{% endif %}</td>
+          <td>{{ i.qty }} {{ units[i.unit] }}</td><td>{{ i.price|money }}</td>
+          <td>{{ vat_labels[i.vat] }}</td><td>{{ (i.qty * i.price)|money }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <p><strong>Итого: {{ total|money }}</strong></p>
+    <form method="post" action="{{ url_for('edit_cart', slug=site.slug) }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="secondary" name="action" value="clear">Очистить корзину</button>
+    </form>
+  {% else %}
+    <p>Позиции еще не добавлены.</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>Тестовая оплата</h2>
+  <p class="hint">Только учебные номера: 1111000000001111, 4444000000002222, 7777000000003333.</p>
+  <form method="post" action="{{ url_for('pay', slug=site.slug) }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="grid fields">
+      <label>Номер тестовой карты
+        <input id="card" name="card" inputmode="numeric" autocomplete="off"
+               maxlength="16" pattern="[0-9]{4}00000000[0-9]{4}" required>
+        <span id="bank-name" class="hint" aria-live="polite">Банк: введите первые четыре цифры</span>
+      </label>
+      <label>Учебный email для чека
+        <input type="email" name="email" value="buyer@example.test" maxlength="140" required>
+      </label>
+      <label>Ответ банка
+        <select name="bank"><option value="ok">Одобрено</option><option value="decline">Отказ</option></select>
+      </label>
+      <label>Ответ ККТ
+        <select name="kkt"><option value="ok">Успех</option><option value="error">Ошибка ККТ</option></select>
+      </label>
+    </div>
+    <button {% if not items %}disabled{% endif %}>Оплатить {{ total|money }}</button>
+  </form>
+</section>

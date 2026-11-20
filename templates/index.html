@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Интернет-эквайринг — учебный стенд{% endblock %}
+{% block content %}
+<p class="eyebrow">Локальная демонстрация</p>
+<h1>Интернет-эквайринг</h1>
+<p>Проведите тестовую оплату, откройте ее в личном кабинете и оформите возврат.</p>
+<div class="grid">
+  {% for site in sites %}
+    <section class="panel">
+      <h2>{{ site.name }}</h2>
+      <p>{{ 'Предоплата, маркировка и зачет аванса' if site.kind == 'vasilek'
+            else 'Немаркируемые товары, полный расчет' }}</p>
+      <a class="button" href="{{ url_for('shop_page', slug=site.slug) }}">Открыть магазин</a>
+    </section>
+  {% else %}
+    <p>Нет активных магазинов.</p>
+  {% endfor %}
+</div>
+<section class="panel">
+  <h2>Служебные разделы</h2>
+  <a href="{{ url_for('login') }}">Личный кабинет продавца</a> ·
+  <a href="{{ orders_url }}/orders">Отдельный сайт оплаченных заказов</a>
+</section>
+{% endblock %}

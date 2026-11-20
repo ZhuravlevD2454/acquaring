@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% macro render_receipt(c) %}
+  <details class="receipt">
+    <summary>Чек №{{ c.row.id }} — {{ kinds[c.row.kind] }} — {{ c.row.kkt_code }}</summary>
+    <p>{{ c.row.created_at }} UTC · Итого {{ c.row.total|money }} ·
+       Безналичная {{ c.row.cashless|money }} · В зачет аванса {{ c.row.advance|money }}</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Позиция</th><th>Количество</th><th>Цена</th><th>Сумма</th>
+        <th>НДС</th><th>Способ расчета</th><th>Код маркировки</th></tr></thead>
+      <tbody>
+        {% for i in c["items"] %}
+          <tr><td>{{ i.name }}</td><td>{{ i.qty }} {{ units[i.unit] }}</td>
+            <td>{{ i.price|money }}</td><td>{{ i.line_total|money }}</td>
+            <td>{{ vat_labels[i.vat] }}</td><td>{{ methods[i.method] }}</td>
+            <td>{{ i.mark_code or '—' }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+    <details><summary>Учебный запрос к ККТ</summary><pre>{{ c.payload|tojson(indent=2) }}</pre></details>
+  </details>
+{% endmacro %}
+{% block title %}ЛК — платеж №{{ payment.id }}{% endblock %}
+{% block content %}
+<p class="eyebrow">{{ payment.login }} / {{ payment.site_name }}</p>
+<h1>Платеж №{{ payment.id }} · {{ payment.total|money }}</h1>
+<p><a class="button" href="{{ url_for('refund', pid=payment.id) }}">Оформить возврат</a></p>
+<section class="panel">
+  <h2>Транзакция №{{ tx.id }}</h2>
+  <p>{{ tx.bank }} · <code>{{ tx.card_mask }}</code> · <code>{{ tx.result_code }}</code> · {{ tx.created_at }} UTC</p>
+</section>
+<section class="panel">
+  <h2>Чеки платежа</h2>
+  {% for c in receipts %}{{ render_receipt(c) }}{% endfor %}
+</section>
+<section class="panel">
+  <h2>Возвраты платежа</h2>
+  {% for f in refunds %}
+    <article>
+      <h3 id="refund-{{ f.row.id }}">Возврат №{{ f.row.id }} · {{ f.row.amount|money }}</h3>
+      <p>Банк: <code>{{ f.row.bank_code }}</code> · {{ f.row.created_at }} UTC</p>
+      {{ render_receipt(f.receipt) }}
+    </article>
+  {% else %}<p>Возвратов нет.</p>{% endfor %}
+</section>
+{% endblock %}

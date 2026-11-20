@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}ЛК — отчеты{% endblock %}
+{% block content %}
+<h1>Отчет по сайтам</h1>
+<p>За все время. Чистая сумма — одобренные платежи минус проведенные возвраты.
+   Чеки зачета аванса не увеличивают оборот.</p>
+<div class="panel table-wrap"><table>
+  <thead><tr><th>Продавец / сайт</th><th>Платежи</th><th>Оборот</th><th>Возвраты</th>
+    <th>Сумма возвратов</th><th>Чистая сумма</th><th>Ошибки ККТ</th></tr></thead>
+  <tbody>
+    {% for r in data %}
+      <tr><td>{{ r.login }} / {{ r.name }}</td><td>{{ r.payments }}</td><td>{{ r.gross|money }}</td>
+        <td>{{ r.refunds }}</td><td>{{ r.returned|money }}</td>
+        <td>{{ (r.gross-r.returned)|money }}</td><td>{{ r.errors }}</td></tr>
+    {% else %}<tr><td colspan="7">Нет сайтов для отчета.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% for c in cards %}
+  <article class="panel">
+    <h3>Заказ по платежу
+      <a href="{{ main_url }}{{ url_for('payment_detail', pid=c.row.payment_id) }}">№{{ c.row.payment_id }}</a>
+      · {{ c.row.total|money }}
+    </h3>
+    <p>{{ c.row.created_at }} UTC · {{ methods[c.row.method] }} ·
+      {% if c.row.closed_receipt_id %}Завершен чеком №{{ c.row.closed_receipt_id }}
+      {% elif c.row.method == 4 %}Дополнительный чек не требуется; результат первичного чека ниже
+      {% elif c.can_close %}Ожидает полного расчета
+      {% else %}Все позиции возвращены{% endif %}
+    </p>
+    <form method="post" action="{{ url_for('order_action', slug=site.slug, pid=c.row.payment_id) }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="view" value="{{ view }}">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Позиция</th><th>Куплено</th><th>Возвращено</th>
+          <th>Цена</th><th>НДС</th><th>Код маркировки</th></tr></thead>
+        <tbody>
+          {% for i in c["items"] %}
+            <tr><td>{{ i.name }}{% if i.marked %} · маркируемый{% endif %}</td>
+              <td>{{ i.qty }} {{ units[i.unit] }}</td><td>{{ i.refunded }}</td>
+              <td>{{ i.price|money }}</td><td>{{ vat_labels[i.vat] }}</td>
+              <td>{% if i.marked and c.can_close and i.refunded < i.qty %}
+                <input aria-label="Код маркировки: {{ i.name }}" name="mark_{{ i.source_item_id }}"
+                  value="{{ i.mark_code }}" placeholder="DEMO-0001" maxlength="95">
+                {% else %}{{ i.mark_code or '—' }}{% endif %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table></div>
+      {% if c.can_close %}
+        <div class="actions">
+          <label>Ответ ККТ
+            <select name="kkt"><option value="ok">Успех</option><option value="error">Ошибка ККТ</option></select>
+          </label>
+          <button class="secondary" name="action" value="save">Сохранить коды</button>
+          <button name="action" value="settle">Сформировать чек полного расчета</button>
+        </div>
+      {% endif %}
+    </form>
+    <p>Ответы ККТ:
+      {% for r in c.attempts %}
+        <span class="badge">№{{ r.id }} · {{ kinds[r.kind] }} · {{ r.kkt_code }}</span>
+      {% endfor %}
+    </p>
+  </article>
+{% else %}
+  <p class="notice">Оплаченных заказов пока нет.</p>
+{% endfor %}

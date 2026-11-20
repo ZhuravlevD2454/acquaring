@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}ЛК — настройки сайтов{% endblock %}
+{% block content %}
+<h1>Настройки сайтов</h1>
+<div class="grid">
+  {% for site in sites %}
+    <form method="post" class="panel stack">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="slug" value="{{ site.slug }}">
+      <h2>{{ site.login }} / {{ site.slug }}</h2>
+      <label>Название <input name="name" maxlength="100" value="{{ site.name }}" required></label>
+      <label class="check"><input type="checkbox" name="active" value="1"
+        {% if site.active %}checked{% endif %}> Витрина активна</label>
+      <button>Сохранить</button>
+      {% if site.active %}<a href="{{ url_for('shop_page', slug=site.slug) }}">Открыть витрину</a>{% endif %}
+    </form>
+  {% else %}<p>У учетной записи нет сайтов.</p>{% endfor %}
+</div>
+{% endblock %}

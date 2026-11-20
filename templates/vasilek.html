@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ site.name }} — оплата и заказы{% endblock %}
+{% block scripts %}<script defer src="{{ url_for('static', filename='shop.js') }}"></script>{% endblock %}
+{% block content %}
+<p class="eyebrow">Тестовый магазин</p>
+<h1>{{ site.name }}</h1>
+<p>Выберите способ расчета до добавления первой позиции. Чтобы изменить его, очистите корзину.</p>
+{% include "checkout.html" %}
+<h2>Оплаченные заказы</h2>
+{% if can_manage %}
+  <p><a href="{{ orders_url }}/orders">Открыть отдельный сайт заказов</a></p>
+  {% include "order_list.html" %}
+{% else %}
+  <p class="notice">Заказы и коды доступны владельцу магазина и администратору.
+    <a href="{{ url_for('login') }}">Войти в ЛК</a>.</p>
+{% endif %}
+{% endblock %}
